@@ -2,24 +2,28 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Transactions', {
+    await queryInterface.createTable('Patients', {
       id: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4
       },
-      doctorPrice: {
-        allowNull: false,
-        type: Sequelize.NUMERIC
-      },
-      medicinePrice: {
-        allowNull: false,
-        type: Sequelize.NUMERIC
-      },
-      status: {
+      firstName: {
         allowNull: false,
         type: Sequelize.STRING
+      },
+      lastName: {
+        allowNull: false,
+        type: Sequelize.STRING
+      },
+      address: {
+        allowNull: false,
+        type: Sequelize.TEXT
+      },
+      phoneNumber: {
+        allowNull: false,
+        type: Sequelize.NUMERIC
       },
       createdAt: {
         allowNull: false,
@@ -32,6 +36,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Transactions');
+    await queryInterface.dropTable('Patients');
   }
 };

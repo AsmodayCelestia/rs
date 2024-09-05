@@ -21,12 +21,12 @@ module.exports = {
         allowNull: false,
         type: Sequelize.TEXT
       },
-      TransactionId: {
+      PatientId: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         references: {
           model: {
-            tableName: 'Transactions',
+            tableName: 'Patients',
           },
           key: 'id'
         }
