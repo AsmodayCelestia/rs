@@ -49,16 +49,16 @@ module.exports = (sequelize, DataTypes) => {
         }
       },
     },
-    TransactionId: {
+    PatientId: {
       allowNull: false,
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
       validate: {
         notNull: {
-          msg: "TransactionId can't be null",
+          msg: "PatientId can't be null",
         },
         notEmpty: {
-          msg: "TransactionId can't be empty",
+          msg: "PatientId can't be empty",
         },
       },
     },

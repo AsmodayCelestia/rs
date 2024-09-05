@@ -30,7 +30,6 @@ async function authentication(req, res, next) {
         }
         req.user ={
             id: findUser.id,
-            username: findUser.username,
             email: findUser.email,
         }
         console.log(req.user.id);

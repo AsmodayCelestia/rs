@@ -1,8 +1,9 @@
-const {User, Patient, ModelRecord, Transaction, Cart} = require('../models')
+const {User, Patient, MedicalRecord, Transaction, Cart} = require('../models')
 const {comparePassword} = require('../helpers/bcrypt')
 const {signToken} = require('../helpers/jwt')
 const { Op } = require("sequelize");
-const axios = require('axios')
+const axios = require('axios');
+
 // const {OAuth2Client} = require('google-auth-library');
 // const client = new OAuth2Client();
 
@@ -42,10 +43,10 @@ class Controller{
         const { filter, page, sort, keyword } = req.query;
         // console.log(page, keyword, filter);
         const paramQuerySQL = {
-            include: [
-                {model: Category,
-                }
-            ],
+            // include: [
+            //     {model: MedicalRecord,
+            //     }
+            // ],
             order: [
                 ['id', 'ASC'] 
             ]
@@ -123,6 +124,8 @@ class Controller{
             // if(req.body.data == undefined){
                 const {firstName, lastName, address, phoneNumber} = req.body
                 const data = await Patient.create({firstName, lastName, address, phoneNumber});
+                console.log(data, "<<<<");
+                
                 res.status(200).json(data);
             // }else{
             //     const {firstName, lastName, address, phoneNumber} = req.body.data;

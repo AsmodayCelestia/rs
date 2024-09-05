@@ -60,19 +60,6 @@ module.exports = (sequelize, DataTypes) => {
         }
       },
     },
-    MedicalRecordId: {
-      allowNull: false,
-      type: Sequelize.UUID,
-      defaultValue: Sequelize.UUIDV4,
-      validate: {
-        notNull: {
-          msg: "MedicalRecordId can't be null",
-        },
-        notEmpty: {
-          msg: "MedicalRecordId can't be empty",
-        },
-      },
-    },
   }, {
     sequelize,
     modelName: 'Patient',
