@@ -1,6 +1,6 @@
 const { verifyToken } = require("../helpers/jwt")
 const {User} = require('../models')
-
+//middleware ada 3. tambah cek subcription n id login
 async function authentication(req, res, next) {
     console.log(req.headers, "<<<<<<<<<");
     try{

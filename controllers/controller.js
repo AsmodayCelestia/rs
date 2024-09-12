@@ -3,7 +3,6 @@ const {comparePassword} = require('../helpers/bcrypt')
 const {signToken} = require('../helpers/jwt')
 const { Op } = require("sequelize");
 const axios = require('axios');
-
 // const {OAuth2Client} = require('google-auth-library');
 // const client = new OAuth2Client();
 
@@ -59,6 +58,7 @@ class Controller{
         //     const name = {[Op.iLike]: `%${keyword.title.name}%`};
         //         paramQuerySQL.where = {name};
         // }
+
 
         // sorting
         if (sort){
