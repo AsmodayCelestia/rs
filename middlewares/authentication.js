@@ -22,6 +22,8 @@ async function authentication(req, res, next) {
         const token = bearerToken.split(' ')[1]
         console.log(token, '<<< ini token');
         const decodeToken = verifyToken(token)
+        console.log(decodeToken);
+        
         
         //3. Kita perlu validasi ke db apakah id dalam payload ada di db
         const findUser = await User.findByPk(decodeToken.id)
