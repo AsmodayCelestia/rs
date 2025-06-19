@@ -1,157 +1,137 @@
-const {User, Patient, MedicalRecord, Transaction, Cart} = require('../models')
-const {comparePassword} = require('../helpers/bcrypt')
-const {signToken} = require('../helpers/jwt')
-const { Op } = require("sequelize");
-const axios = require('axios');
-// const {OAuth2Client} = require('google-auth-library');
-// const client = new OAuth2Client();
+const { User, Unit, Action, ActionRange, Performance, RewardLog } = require('../models');
+const { comparePassword } = require('../helpers/bcrypt');
+const { signToken } = require('../helpers/jwt');
+const { Op } = require('sequelize');
 
-class Controller{
-    static async login(req, res, next){
-        try {
-            const {email, password} = req.body
-            // console.log(req.body,"<<<<<<<<< THIS IS BODY");
-            if(!email){
-                res.status(404).json({message: "Email is required"})
-            }
-            if(!password){
-                res.status(404).json({message: "Password is required"})
-            }
-            const user = await User.findOne({where:{email}})
-            // console.log(user,"<<<<<<< THIS IS USER");
-            if(!user){
-                res.status(404).json({message: "Invalid email/password"})
-            }
-            if(!user){
-                res.status(401).json({message: "Invalid email/password"})
-            }
-            const compare = comparePassword(password, user.password)
-            if(!compare){
-                res.status(401).json({message: "Invalid email/password"})
-            }
-            const access_token = signToken({id:user.id})
-            console.log(access_token);
-            res.status(200).json({Authorization: `Bearer ${access_token}`})
-        } catch (error) {
-            console.log(error);
-            res.status(500).json({message: "Internal Server Error"})
-        }
+class Controller {
+  // === LOGIN ===
+  static async login(req, res, next) {
+    try {
+      const { email, password } = req.body;
+      if (!email || !password) throw { name: 'Email/Password required' };
+
+      const user = await User.findOne({ where: { email } });
+      if (!user || !comparePassword(password, user.password)) {
+        return res.status(401).json({ message: 'Invalid email/password' });
+      }
+
+      const access_token = signToken({ id: user.id });
+      res.status(200).json({
+        Authorization: `Bearer ${access_token}`,
+        role: user.role,
+        email: user.email
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: 'Internal Server Error' });
     }
+  }
 
-    static async allPatient(req, res, next) {
-        console.log(req.query);
-    
-        const { filter, page, sort, search } = req.query;
-        console.log(page, filter, search, "<<<<< nih query");
-        
-        const paramQuerySQL = {
-            order: [
-                ['id', 'ASC'] 
-            ]
-        };
-        let limit = 3;
-        let offset = 0;
-                // Search
-        if (filter) {
-            const { title } = filter.search;
-            if (title && title !== '') {
-                paramQuerySQL.where = {
-                    [Op.or]: [
-                        { firstName: { [Op.iLike]: `%${title}%` } },
-                        { lastName: { [Op.iLike]: `%${title}%` } }
-                    ]
-                };
-                if (page && page.size && page.number) {
-                    limit = page.size;
-                    offset = page.number * limit - limit;
-                }
-            }
-            console.log(title, "<<<<<<ada search");
-            
-        }else if (!filter) {
-            if (page && page.size && page.number) {
-                limit = page.size;
-                offset = page.number * limit - limit;
-            }
+  // === KARYAWAN - INPUT TINDAKAN ===
+  static async inputReward(req, res) {
+    try {
+      const { actionId, jumlahPasien, tanggal } = req.body;
+      const userId = req.user.id;
 
-            paramQuerySQL.limit = limit;
-            paramQuerySQL.offset = offset;
-            console.log('<<<<<<<<no search');
-            
-        }
-        try {
-            const patients = await Patient.findAll(paramQuerySQL);
-            res.status(200).json({ message: 'Read Success', patients });
-        } catch (error) {
-            next(error);
-        }
-        }
-    
+      const action = await Action.findByPk(actionId);
+      if (!action) throw { name: 'ActionNotFound' };
 
-    static async patient(req, res, next){
-        const {id} = req.params
-        console.log(id, "ini id dari params");
-        try {
-            const patient = await Patient.findOne({
-                where: {
-                    id
-                  },
-                //   include: [
-                //     {
-                //         model: ModelRecord, 
-                //     },
-                // ]
-                });
-            if(!patient){
-                throw {name: "Error Not Found"}
-            }
-            res.status(200).json({patient, message: "Read Articles Detail Success"})
-        } catch (error) {
-            next(error);
+      const range = await ActionRange.findOne({
+        where: {
+          actionId,
+          minValue: { [Op.lte]: jumlahPasien },
+          maxValue: { [Op.gte]: jumlahPasien }
         }
+      });
+
+      const pengali = range ? range.pengali : 0;
+      const nilaiTindakan = action.nilaiPerTindakan;
+      const subtotal = pengali * nilaiTindakan;
+
+      await Performance.create({ userId, actionId, jumlahPasien, tanggal });
+
+      const [rewardLog, created] = await RewardLog.findOrCreate({
+        where: { userId, tanggal },
+        defaults: { totalReward: subtotal }
+      });
+
+      if (!created) {
+        rewardLog.totalReward += subtotal;
+        await rewardLog.save();
+      }
+
+      res.status(201).json({
+        message: 'Reward calculated & saved',
+        pengali,
+        nilaiTindakan,
+        subtotal,
+        totalReward: rewardLog.totalReward
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: 'Internal Server Error' });
     }
+  }
 
-    static async deletePatient(req, res, next){
-        const {id} = req.params
-        console.log(id, "ini id dari params");
-        try {
-            const patient = await Patient.destroy({
-                where: {
-                    id
-                  },
-                });
-            if(!patient){
-                throw {name: "Error Not Found"}
-            }
-            res.status(200).json({patient, message: "Read Articles Detail Success"})
-        } catch (error) {
-            next(error);
-        }
+  // === KARYAWAN - LIHAT REWARD PRIBADI ===
+  static async myRewards(req, res) {
+    try {
+      const userId = req.user.id;
+      const logs = await RewardLog.findAll({
+        where: { userId },
+        order: [['tanggal', 'ASC']]
+      });
+      res.status(200).json(logs);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal Server Error' });
     }
+  }
 
-    static async addPatient(req, res, next) {
-        try {
-            // if(req.body.data == undefined){
-            console.log(req.body);
-            
-                const {firstName, lastName, age, sex, birthdate, address, phoneNumber} = req.body
-                const data = await Patient.create({firstName, lastName, umur: age, sex, birthdate, address, phoneNumber});
-                console.log(data, "<<<<");
-                
-                res.status(200).json(data);
-            // }else{
-            //     const {firstName, lastName, address, phoneNumber} = req.body.data;
-            //     const data = await Patient.create({firstName, lastName, address, phoneNumber});
-            //     res.status(200).json(data);
-            // }
-            // const {firstName, lastName, address, phoneNumber} = req.body.data;
-            // // Ensure "userId" is not included if it's not part of the Cart model
-            // const data = await Patient.create({firstName, lastName, address, phoneNumber});
-            // res.status(200).json(data);
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ error: 'Internal Server Error' });
-        }
+  // === ADMIN - CREATE UNIT ===
+  static async createUnit(req, res) {
+    try {
+      const { name } = req.body;
+      const unit = await Unit.create({ name });
+      res.status(201).json(unit);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal Server Error' });
     }
+  }
+
+  // === ADMIN - CREATE ACTION ===
+  static async createAction(req, res) {
+    try {
+      const { name, unitId, nilaiPerTindakan } = req.body;
+      const action = await Action.create({ name, unitId, nilaiPerTindakan });
+      res.status(201).json(action);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
+
+  // === ADMIN - CREATE RANGE (pengali) ===
+  static async createRange(req, res) {
+    try {
+      const { actionId, minValue, maxValue, pengali } = req.body;
+      const range = await ActionRange.create({ actionId, minValue, maxValue, pengali });
+      res.status(201).json(range);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
+
+  // === ADMIN - LIHAT SEMUA CAPAIAN ===
+  static async allRewards(req, res) {
+    try {
+      const logs = await RewardLog.findAll({
+        include: [{ model: User, attributes: ['name', 'email'] }],
+        order: [['tanggal', 'ASC']]
+      });
+      res.status(200).json(logs);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
 }
-module.exports = Controller
+
+module.exports = Controller;
