@@ -1,28 +1,33 @@
 'use strict';
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Users', {
+    await queryInterface.createTable('ActionRanges', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      name: {
-        type: Sequelize.STRING
-      },
-      email: {
-        unique: true,
+      actionId: {
+        type: Sequelize.INTEGER,
         allowNull: false,
-        type: Sequelize.STRING
+        references: {
+          model: 'Actions',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
-      password: {
-        allowNull: false,
-        type: Sequelize.STRING
+      minValue: {
+        type: Sequelize.INTEGER,
+        allowNull: false
       },
-      role: {
-        type: Sequelize.STRING, 
+      maxValue: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      pengali: {
+        type: Sequelize.INTEGER,
         allowNull: false
       },
       createdAt: {
@@ -38,6 +43,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Users');
+    await queryInterface.dropTable('ActionRanges');
   }
 };

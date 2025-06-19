@@ -38,79 +38,89 @@ class Controller{
         }
     }
 
-    static async allPatient(req, res, next){
-        const { filter, page, sort, keyword } = req.query;
-        // console.log(page, keyword, filter);
+    static async allPatient(req, res, next) {
+        console.log(req.query);
+    
+        const { filter, page, sort, search } = req.query;
+        console.log(page, filter, search, "<<<<< nih query");
+        
         const paramQuerySQL = {
-            // include: [
-            //     {model: MedicalRecord,
-            //     }
-            // ],
             order: [
                 ['id', 'ASC'] 
             ]
         };
-        let limit = 9
-        let offset = 0
-
-        //search
-        // if(keyword["title"] !== '' && typeof keyword["title"] !== 'undefined'){
-        //     const name = {[Op.iLike]: `%${keyword.title.name}%`};
-        //         paramQuerySQL.where = {name};
-        // }
-
-
-        // sorting
-        if (sort){
-            paramQuerySQL.order = [["id", sort]]
-        }
-
-        // filtering by category
-        // if (filter?.category) {
-        //     paramQuerySQL.where = {
-        //         categoryId: filter.category,
-        //     }
-        // }
-        
-        // pagination
-        if (page !== '' && typeof page !== 'undefined') {
-            if (page.size !== '' && typeof page.size !== 'undefined') {
+        let limit = 3;
+        let offset = 0;
+                // Search
+        if (filter) {
+            const { title } = filter.search;
+            if (title && title !== '') {
+                paramQuerySQL.where = {
+                    [Op.or]: [
+                        { firstName: { [Op.iLike]: `%${title}%` } },
+                        { lastName: { [Op.iLike]: `%${title}%` } }
+                    ]
+                };
+                if (page && page.size && page.number) {
+                    limit = page.size;
+                    offset = page.number * limit - limit;
+                }
+            }
+            console.log(title, "<<<<<<ada search");
+            
+        }else if (!filter) {
+            if (page && page.size && page.number) {
                 limit = page.size;
-                paramQuerySQL.limit = limit;
-            }
-            if (page.number !== '' && typeof page.number !== 'undefined') {
                 offset = page.number * limit - limit;
-                paramQuerySQL.offset = offset;
             }
-        } else {
-        paramQuerySQL.limit = limit;
-        paramQuerySQL.offset = offset;
+
+            paramQuerySQL.limit = limit;
+            paramQuerySQL.offset = offset;
+            console.log('<<<<<<<<no search');
+            
         }
-        console.log(paramQuerySQL, '<<<< ini yg bakal di findall');
         try {
-            const menu = await Patient.findAll(paramQuerySQL)
-            console.log(menu);
-            res.status(200).json({message: 'Read Success', menu})
+            const patients = await Patient.findAll(paramQuerySQL);
+            res.status(200).json({ message: 'Read Success', patients });
         } catch (error) {
-            next(error)
+            next(error);
         }
-    }
+        }
+    
 
     static async patient(req, res, next){
         const {id} = req.params
         console.log(id, "ini id dari params");
         try {
-            const patient = await this.patient.findOne({
+            const patient = await Patient.findOne({
                 where: {
                     id
                   },
-                  include: [
-                    {
-                        model: ModelRecord, 
-                    },
-                ]
+                //   include: [
+                //     {
+                //         model: ModelRecord, 
+                //     },
+                // ]
                 });
-            if(!menu){
+            if(!patient){
+                throw {name: "Error Not Found"}
+            }
+            res.status(200).json({patient, message: "Read Articles Detail Success"})
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async deletePatient(req, res, next){
+        const {id} = req.params
+        console.log(id, "ini id dari params");
+        try {
+            const patient = await Patient.destroy({
+                where: {
+                    id
+                  },
+                });
+            if(!patient){
                 throw {name: "Error Not Found"}
             }
             res.status(200).json({patient, message: "Read Articles Detail Success"})
@@ -122,8 +132,10 @@ class Controller{
     static async addPatient(req, res, next) {
         try {
             // if(req.body.data == undefined){
-                const {firstName, lastName, address, phoneNumber} = req.body
-                const data = await Patient.create({firstName, lastName, address, phoneNumber});
+            console.log(req.body);
+            
+                const {firstName, lastName, age, sex, birthdate, address, phoneNumber} = req.body
+                const data = await Patient.create({firstName, lastName, umur: age, sex, birthdate, address, phoneNumber});
                 console.log(data, "<<<<");
                 
                 res.status(200).json(data);

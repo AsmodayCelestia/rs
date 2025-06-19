@@ -1,0 +1,28 @@
+[
+    {
+      "unitId": 1,
+      "name": "Infus Pasien",
+      "nilaiPerTindakan": 15000
+    },
+    {
+      "unitId": 1,
+      "name": "Rapid",
+      "nilaiPerTindakan": 25000
+    },
+    {
+      "unitId": 1,
+      "name": "KB",
+      "nilaiPerTindakan": 10000
+    },
+    {
+      "unitId": 2,
+      "name": "Kunjungan Pasien",
+      "nilaiPerTindakan": 20000
+    },
+    {
+      "unitId": 2,
+      "name": "Periksa Lab",
+      "nilaiPerTindakan": 50000
+    }
+  ]
+  

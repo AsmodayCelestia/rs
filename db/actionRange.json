@@ -1,0 +1,25 @@
+[
+    { "actionId": 1, "minValue": 1, "maxValue": 5, "pengali": 1 },
+    { "actionId": 1, "minValue": 6, "maxValue": 10, "pengali": 3 },
+    { "actionId": 1, "minValue": 11, "maxValue": 15, "pengali": 5 },
+    { "actionId": 1, "minValue": 16, "maxValue": 20, "pengali": 9 },
+  
+    { "actionId": 2, "minValue": 1, "maxValue": 5, "pengali": 1 },
+    { "actionId": 2, "minValue": 6, "maxValue": 10, "pengali": 4 },
+    { "actionId": 2, "minValue": 11, "maxValue": 15, "pengali": 7 },
+    { "actionId": 2, "minValue": 16, "maxValue": 20, "pengali": 10 },
+  
+    { "actionId": 3, "minValue": 1, "maxValue": 1, "pengali": 1 },
+    { "actionId": 3, "minValue": 2, "maxValue": 2, "pengali": 6 },
+    { "actionId": 3, "minValue": 3, "maxValue": 3, "pengali": 8 },
+    { "actionId": 3, "minValue": 4, "maxValue": 4, "pengali": 12 },
+  
+    { "actionId": 4, "minValue": 81, "maxValue": 100, "pengali": 1 },
+    { "actionId": 4, "minValue": 101, "maxValue": 120, "pengali": 6 },
+    { "actionId": 4, "minValue": 121, "maxValue": 150, "pengali": 10 },
+  
+    { "actionId": 5, "minValue": 1, "maxValue": 10, "pengali": 1 },
+    { "actionId": 5, "minValue": 11, "maxValue": 15, "pengali": 6 },
+    { "actionId": 5, "minValue": 16, "maxValue": 20, "pengali": 10 }
+  ]
+  

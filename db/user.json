@@ -1,8 +1,14 @@
-[{
-    "firstName":"admin",
-    "lastName":"test",
-    "email":"heru@gmail.com",
-    "password":"tehbotol",
-    "thumbnail": "-",
-    "phoneNumber":"081234567890"
-  }]
+[
+  {
+    "name": "Admin Darwis",
+    "email": "admin@darwis.com",
+    "password": "admin123",
+    "role": "admin"
+  },
+  {
+    "name": "Almira Khoerunnisa",
+    "email": "almira@darwis.com",
+    "password": "karyawan123",
+    "role": "karyawan"
+  }
+]

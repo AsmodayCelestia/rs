@@ -5,6 +5,8 @@ const express = require('express')
 const app = express()
 const router = require('./routers/router')
 // const {errHandler} = require('./middlewares/errHandler')
+
+
 const cors = require('cors')
 
 app.use(cors())
