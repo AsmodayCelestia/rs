@@ -1,5 +1,5 @@
 const { User, Unit, Action, ActionRange, Performance, RewardLog } = require('../models');
-const { comparePassword } = require('../helpers/bcrypt');
+const { comparePassword, hashPassword } = require('../helpers/bcrypt');
 const { signToken } = require('../helpers/jwt');
 const { Op } = require('sequelize');
 
@@ -30,10 +30,13 @@ class Controller {
   static async register(req, res) {
     try {
       const { name, email, password, role } = req.body;
-      if (!email || !password || !role) {
+      if (!email || !password || !role || !name) {
         return res.status(400).json({ message: 'Missing required fields' });
       }
-      const user = await User.create({ name, email, password, role });
+  
+      const hashedPassword = hashPassword(password);
+      const user = await User.create({ name, email, password: hashedPassword, role });
+  
       res.status(201).json({ message: 'User registered', id: user.id });
     } catch (err) {
       console.error(err);
@@ -503,15 +506,18 @@ class Controller {
         const subtotal = pengali * nilai;
   
         return {
-          tanggal: p.tanggal,
-          totalReward: subtotal,
-          User: p.User,
-          Action: {
-            name: action.name,
-            nilaiPerTindakan: nilai,
-            unit: unit?.name || '-'
+            tanggal: p.tanggal,
+            jumlahPasien: p.jumlahPasien,
+            pengali,
+            totalReward: subtotal,
+            User: p.User,
+            Action: {
+              name: action.name,
+              nilaiPerTindakan: nilai,
+              unit: unit?.name || '-'
+            }
           }
-        };
+          
       });
   
       res.status(200).json(result);
