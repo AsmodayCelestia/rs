@@ -4,7 +4,6 @@ const { signToken } = require('../helpers/jwt');
 const { Op } = require('sequelize');
 
 class Controller {
-  // === LOGIN ===
   static async login(req, res, next) {
     try {
       const { email, password } = req.body;
@@ -44,49 +43,25 @@ class Controller {
     }
   }
 
-  // === KARYAWAN - INPUT TINDAKAN ===
   static async inputReward(req, res) {
     try {
       const { actionId, jumlahPasien, tanggal } = req.body;
       const userId = req.user.id;
   
-      console.log('[1] Input:', { userId, actionId, jumlahPasien, tanggal });
-  
-      // Ambil action beserta Unit dan Range
       const action = await Action.findByPk(actionId, {
         include: [Unit, ActionRange]
       });
-  
       if (!action) throw { name: 'ActionNotFound' };
-      console.log('[2] Action:', {
-        id: action.id,
-        name: action.name,
-        nilaiPerTindakan: action.nilaiPerTindakan,
-        unit: action.Unit?.name,
-        ranges: action.ActionRanges?.length
-      });
-  
       const nilaiPerTindakan = action.nilaiPerTindakan;
-  
-      // Hitung pengali
       let pengali = 0;
       for (let range of action.ActionRanges) {
-        console.log('[3] Cek range:', range.minValue, '-', range.maxValue, '->', range.pengali);
         if (jumlahPasien >= range.minValue && jumlahPasien <= range.maxValue) {
           pengali = range.pengali;
           break;
         }
       }
-      console.log('[4] Pengali:', pengali);
-  
       const subtotal = pengali * nilaiPerTindakan;
-      console.log('[5] Subtotal:', subtotal);
-  
-      // Simpan ke Performance
       const performance = await Performance.create({ userId, actionId, jumlahPasien, tanggal });
-      console.log('[6] Saved performance ID:', performance.id);
-  
-      // Update atau buat reward log
       const [rewardLog, created] = await RewardLog.findOrCreate({
         where: { userId, tanggal },
         defaults: { totalReward: subtotal }
@@ -96,8 +71,6 @@ class Controller {
         rewardLog.totalReward = Number(rewardLog.totalReward) + Number(subtotal);
         await rewardLog.save();
       }
-      
-  
       res.status(201).json({
         message: 'Reward calculated & saved',
         tanggal,
@@ -115,7 +88,6 @@ class Controller {
       res.status(500).json({ message: 'Internal Server Error' });
     }
   }
-
 
   static async myRewards(req, res) {
     try {
@@ -161,7 +133,6 @@ class Controller {
     }
   }
 
-  // === ADMIN - LIHAT REWARD PER USER ===
   static async rewardsByUserId(req, res) {
     try {
       const { id } = req.params;
@@ -202,7 +173,6 @@ class Controller {
     }
   }
   
-  // === ADMIN - UPDATE PERFORMANCE DATA ===
   static async updateUserReward(req, res) {
     try {
       const { id, performanceId } = req.params;
@@ -220,7 +190,6 @@ class Controller {
     }
   }
   
-  // === ADMIN - DELETE PERFORMANCE DATA ===
   static async deleteUserReward(req, res) {
     try {
       const { id, performanceId } = req.params;
@@ -235,7 +204,6 @@ class Controller {
     }
   }
   
-  // controller.js
   static async myPerformance(req, res) {
     try {
       const performances = await Performance.findAll({
@@ -320,7 +288,6 @@ class Controller {
     }
   }  
   
-  // === ADMIN - UNIT CRUD ===
   static async createUnit(req, res) {
     try {
       const { name } = req.body;
@@ -373,7 +340,6 @@ class Controller {
     }
   }
 
-  // === ADMIN - ACTION CRUD ===
   static async createAction(req, res) {
     try {
       const { name, unitId, nilaiPerTindakan } = req.body;
@@ -426,7 +392,6 @@ class Controller {
     }
   }
 
-  // === ADMIN - RANGE CRUD ===
   static async createRange(req, res) {
     try {
       const { actionId, minValue, maxValue, pengali } = req.body;

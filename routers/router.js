@@ -12,17 +12,16 @@ router.post('/register', Controller.register);
 // PROTECTED
 router.use(authentication);
 
-// ----------- KARYAWAN -----------
+
 router.post('/rewards', authorization(['karyawan']), Controller.inputReward);
 router.get('/my-rewards', authorization(['karyawan']), Controller.myRewards);
 
-// ----------- ADMIN -----------
+
 router.get('/user/:id/rewards', authorization(['admin']), Controller.rewardsByUserId);
 router.put('/user/:id/reward/:performanceId', authorization(['admin']), Controller.updateUserReward);
 router.delete('/user/:id/reward/:performanceId', authorization(['admin']), Controller.deleteUserReward);
 
 router.get('/my-performance', Controller.myPerformance);
-// ----------- ADMIN -----------
 router.get('/user/:id/performance', authorization(['admin']), Controller.performanceByUserId);
 
 
