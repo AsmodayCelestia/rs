@@ -3,6 +3,8 @@
 
 Sistem Reward POIN berbasis Web App untuk mencatat tindakan medis karyawan dan mengonversinya menjadi reward harian berdasarkan pengali yang ditentukan admin.
 
+🧠 Dokumentasi ini disusun bersama ChatGPT sebagai asisten teknikal pribadi dalam membantu menyusun logika backend, frontend, serta dokumentasi sistem reward.
+
 ---
 
 ## 🚀 Cara Menjalankan Project
